@@ -4,17 +4,14 @@ import curses
 screen = curses.initscr()
 curses.curs_set(0)
 
-screen.scrollok(0)  # set scrolllock to be false
+screen_height, screen_width = screen.getmaxyx()
 
-
-screen_width, screen_height = screen.getmaxyx()
-
-window = curses.newwin(screen_width, screen_height, 0, 0)
-
-print("screen size", [screen_width, screen_height])
-
+window = curses.newwin(screen_height, screen_width, 0, 0)
 window.keypad(1)  # accept window input
 window.timeout(100)  # refresh every 100 ms
+
+window.border()
+
 
 snake_x = round(screen_width/4)
 snake_y = round(screen_height/2)
@@ -25,9 +22,8 @@ snake = [
     [snake_y, snake_x - 2],
 ]
 
-#print("screen width and height/2", round(screen_width/2), round(screen_height/2))
 
-food = [round(screen_width/2), round(screen_height/2)]
+food = [round(screen_height/2), round(screen_width/2)]
 
 window.addch(food[0], food[1], curses.ACS_PI)
 
@@ -62,16 +58,24 @@ while True:
         food = None
         while food is None:
             new_food = [
-                random.randint(1, screen_height - 1),
-                random.randint(1, screen_width - 1)
+                random.randint(1, screen_height - 10),
+                random.randint(1, screen_width - 10)
             ]
 
             food = new_food if new_food not in snake else None
 
-            window.addch(food[0], food[1], curses.ACS_PI)
-
+            try:
+                window.addch(food[0], food[1], curses.ACS_PI)
+            except (curses.error):
+                pass
     else:
         tail = snake.pop()
-        window.addch(tail[0], tail[1], ' ')
+        try:
+            window.addch(round(tail[0]), round(tail[1]), ' ')
+        except(curses.error):
+            pass
 
-    w.addch(snake[0][0], snake[0][1], curses.ACS_CKBOARD)
+    try:
+        window.addch(snake[0][0], snake[0][1], curses.ACS_CKBOARD)
+    except(curses.error):
+        raise curses.error
